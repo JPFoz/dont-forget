@@ -3,7 +3,8 @@ export type Item = {
   text: string | null,
   done: boolean,
   dateCreated: Date,
-  dateCompleted: Date
+  dateCompleted: Date,
+  visibility: string
 }
 
 export type ItemStore = {

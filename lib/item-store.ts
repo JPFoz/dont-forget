@@ -1,30 +1,34 @@
-import { proxy, useSnapshot} from 'valtio'
-import { addItemToList, removeItem, updateListItem, toggleListItem } from './firestore'
-import { ItemStore, Item} from './types'
-import { uuidv4 } from '@firebase/util'
+import { proxy, useSnapshot} from "valtio"
+import { addItemToList, removeListItem, updateListItem, toggleListItem } from "./firestore"
+import { ItemStore, Item} from "./types"
+import { uuidv4 } from "@firebase/util"
 
-export const itemStore = proxy<ItemStore>({
-  items: [],
-})
+export const TOBUY_PROXY = "to-buy"
+export const TODO_PROXY = "todo"
+
+const proxies = {
+  "to-buy": proxy<ItemStore>({items: []}),
+  "todo": proxy<ItemStore>({items: []})
+}
 
 export const isItemDiff = (a: Item, b: Item) => a.text !== b.text || a.done !== b.done;
 
 export const actions = {
-  addItem(item: Omit<Item, 'id'>) {
+  addItem(proxyName: string, item: Omit<Item, "id">) {
     const newItem = {
       ...item,
       id: uuidv4(),
     }
-    itemStore.items.push(newItem)
-    addItemToList(newItem, 'to-buy')
+    proxies[proxyName].items.push(newItem)
+    addItemToList(proxyName, newItem)
   },
-  syncChanges(changes){
+  syncChanges(proxyName: string, changes){
     changes.forEach((change) => {
       if (change.type === "added") {
         const newItem = change.doc.data()
-        const existsAlready = itemStore.items.find((i) => i.id === newItem.id)
+        const existsAlready = proxies[proxyName].items.find((item: Item) => item.id === newItem.id)
         if(!existsAlready){
-          itemStore.items.push({
+          proxies[proxyName].items.push({
             ...newItem,
             dateCompleted: newItem.dateCompleted.toDate(),
             dateCreated: newItem.dateCreated.toDate()
@@ -33,35 +37,35 @@ export const actions = {
       }
       if (change.type === "modified") {
           const changedItem = change.doc.data()
-          const storeItem = itemStore.items.find((i) => i.id === changedItem.id)
+          const storeItem = proxies[proxyName].items.find((item: Item) => item.id === changedItem.id)
           storeItem.text = changedItem.text
           storeItem.done = changedItem.done
       }
       if (change.type === "removed") {
         const removedItem = change.doc.data()
-        itemStore.items = itemStore.items.filter((item) => item.id !== removedItem.id)
+        proxies[proxyName].items = proxies[proxyName].items.filter((item: Item) => item.id !== removedItem.id)
       }
     });
   },
-  updateItemText(id: string, text: string){
-    const item = itemStore.items.find((item) => item.id === id)
+  updateItemText(proxyName: string, id: string, text: string){
+    const item = proxies[proxyName].items.find((item) => item.id === id)
     item.text = text
-    updateListItem('to-buy', item)
+    updateListItem(proxyName, item)
   },
-  toggleItem(id: string, value: boolean) {
-    const item = itemStore.items.find((item) => item.id === id)
+  toggleItem(proxyName: string, id: string, value: boolean) {
+    const item = proxies[proxyName].items.find((item: Item) => item.id === id)
     if (item && value) item.done = value
     else if (item) item.done = !item.done
-    toggleListItem('to-buy', id, value)
+    toggleListItem(proxyName, id, value)
   },
-  removeItem(id: string) {
-    itemStore.items = itemStore.items.filter((item) => item.id !== id)
-    removeItem(id, 'to-buy')
+  removeItem(proxyName: string, id: string) {
+    proxies[proxyName].items = proxies[proxyName].items.filter((item: Item) => item.id !== id)
+    removeListItem(proxyName, id)
   }
 }
 
-export function useItems() {
-  const snapShot = useSnapshot(itemStore, { sync: true })
+export function useItems(proxyName: string) {
+  const snapShot = useSnapshot(proxies[proxyName], { sync: true })
   return snapShot.items
 }
 
