@@ -14,12 +14,13 @@ import {
 } from "firebase/firestore";
 import { Item } from "./types";
 
+// These do _not_ need to be treated as secret. Read more here: https://firebase.google.com/docs/projects/api-keys
 const firebaseConfig = {
-    apiKey: process.env.FIRESTORE_API_KEY,
-    authDomain: process.env.FIRESTORE_AUTH_DOMAIN,
-    projectId: process.env.FIRESTORE_PROJECT_ID,
-    storageBucket: process.env.FIRESTORE_STORAGE_BUCKET,
-    appId: process.env.FIRESTORE_APP_ID,
+    apiKey: process.env.NEXT_PUBLIC_FIRESTORE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIRESTORE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIRESTORE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIRESTORE_STORAGE_BUCKET,
+    appId: process.env.NEXT_PUBLIC_FIRESTORE_APP_ID,
 };
 
 let app;

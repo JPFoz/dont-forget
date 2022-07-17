@@ -48,7 +48,7 @@ const Main: NextPage = () => {
       </Head>
       <body className="bg-gradient-to-b from-pink-300 to-pink-200 dark:bg-black dark:from-black dark:to-black h-screen">
         <div className="flex justify-center items-center flex-row pt-10 pb-10">
-          <h1 className="h-1 text-rose-50 dark:text-slate-300 title-text text-4xl" onClick={onModeToggle}> DON"T FORGET </h1>
+          <h1 className="h-1 text-rose-50 dark:text-slate-300 title-text text-4xl" onClick={onModeToggle}> DON'T FORGET </h1>
         </div>
         {mode !== "dark" && <div className="flex justify-center items-center flex-row"><Image objectFit="contain" src={panda}></Image></div>}
         <div className="flex flex-col items-center">
